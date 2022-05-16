@@ -1,0 +1,134 @@
+package Testng.Imdb;
+
+
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+
+
+public class Imdbcheck {
+	public String baseUrl = "https://www.imdb.com/";
+	public static WebDriver driver;
+	
+	@BeforeTest
+	public void setBaseURL() {
+		System.setProperty("webdriver.chrome.driver","E:\\chrome path\\chromedriver.exe");
+		driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.get(baseUrl);
+	}
+
+	@Test
+	public void launch() throws InterruptedException, Exception {
+	//WebDriverManager.chromedriver().setup();
+	
+	WebElement values= driver.findElement(By.xpath("//input[@id='suggestion-search']"));
+	values.sendKeys("Pushpa: The Rise - Part 1");
+	values.sendKeys(Keys.ENTER);
+	Thread.sleep(2000);
+	driver.findElement(By.xpath("/html/body/div[3]/div/div[2]/div[3]/div[1]/div/div[2]/table/tbody/tr[1]/td[1]/a/img")).click();
+	Thread.sleep(2000);
+	// explicit wait - to wait for the compose button to be click-able
+	WebDriverWait wait = new WebDriverWait(driver,java.time.Duration.ofSeconds(30));
+	wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@data-testid=\"hero-subnav-bar-all-topics-button\"]")));
+	WebElement element= driver.findElement(By.xpath("//button[@data-testid=\"hero-subnav-bar-all-topics-button\"]"));
+	JavascriptExecutor js = (JavascriptExecutor)driver;
+	js.executeScript("arguments[0].click();", element);
+	WebDriverWait wait1 = new WebDriverWait(driver,java.time.Duration.ofSeconds(30));
+	wait1.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Release dates']")));
+	driver.findElement(By.xpath("//a[text()='Release dates']")).click();
+	Thread.sleep(30);
+	String j = driver.getTitle();
+	 System.out.println("Your page title Is : "+j);
+	 Assert.assertEquals("Pushpa: The Rise - Part 1 (2021) - Release Info - IMDb",j);
+	 Assert.assertEquals("Pushpa: The Rise - Part 1 (2021) - Release Info - IMDb",driver.getTitle());
+	 
+	 String releaseDate="17 December 2021";
+	 List<WebElement> rowCount = driver.findElements(By.tagName("tr"));
+	     System.out.println("Total roe on the Wb Page: " + rowCount.size());
+
+	     //We will iterate through the list and will check the elements in the list.
+	     for (int index = 0; index < rowCount.size(); index++) {
+	 			
+	 	 		System.out.println("Entered in loop");
+
+	 			String text = rowCount.get(index).findElement(By.xpath("//*[@id=\"releaseinfo_content\"]/table[1]/tbody/tr[6]/td[1]/a")).getText();
+	 			System.out.println("text is " + text);
+	 			if(text.equals("India"))
+	 			{
+	 				System.out.println("Country Name date Matched");
+	 				
+	 			}
+	 			else {
+	 				System.out.println("Country Name not Matched");
+	 			}
+	 			
+	 			List<WebElement> colCount = driver.findElements(By.tagName("td"));
+	 		     System.out.println("Total roe on the Wb Page: " + colCount.size());
+
+	 		     //We will iterate through the list and will check the elements in the list.
+	 		     for (int colindex = 0; colindex < colCount.size(); colindex++) {
+	 		 			
+	 		 	 		System.out.println("Entered in loop");
+
+	 		 			String coltext = colCount.get(index).findElement(By.xpath("//*[@id=\"releaseinfo_content\"]/table[1]/tbody/tr[6]/td[2]")).getText();
+	 		 			System.out.println("text is " + coltext);
+	 		 			if(coltext.equals("17 December 2021"))
+	 		 			{
+	 		 				System.out.println("Release Date Matched------");
+	 		 				
+	 		 			}
+	 		 			else {
+	 		 				System.out.println("Release Date not Matched-----");
+	 		 			}
+   
+	}}
+	     
+}
+	@AfterMethod //AfterMethod annotation - This method executes after every test execution
+	public void screenShot(ITestResult result){
+	//using ITestResult.FAILURE is equals to result.getStatus then it enter into if condition
+	if(ITestResult.FAILURE==result.getStatus()){
+	try{
+	// To create reference of TakesScreenshot
+	TakesScreenshot screenshot=(TakesScreenshot)driver;
+	// Call method to capture screenshot
+	File src=screenshot.getScreenshotAs(OutputType.FILE);
+	// Copy files to specific location
+	// result.getName() will return name of test case so that screenshot name will be same as test case name
+	FileUtils.copyFile(src, new File("./Screenshot"+result.getName()+".png"));
+	System.out.println("Successfully captured a screenshot");
+	}catch (Exception e){
+	System.out.println("Exception while taking screenshot "+e.getMessage());
+	}
+	}
+	driver.quit();
+	 //For full page screen shot
+		// File src =new File("E:\\Mycompanyproject\\Imdb\\Screenshot\\Ashot1.png");
+		//Screenshot dest=new AShot().shootingStrategy(ShootingStrategies.viewportPasting(1000)).takeScreenshot(driver);
+//		ImageIO.write(dest.getImage(), "png", src);
+	}
+	}
+
